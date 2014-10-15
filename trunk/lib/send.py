@@ -1,5 +1,6 @@
 import smtplib
-
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 class SEND:
     
@@ -22,14 +23,16 @@ class SEND:
     def subject(self, subject=""):
         self.subject = subject
 
-    def body(self, body=""):
-        self.body = body
+    def content(self, content=""):
+        self.content = content
 
-    def send_mail(self):
-        headers = "\r\n".join(["from: " + self.from_addr,
-                       "subject: " + self.subject,
-                       "to: " + self.to_addr,
-                       "mime-version: 1.0",
-                       "content-type: text/html"])
-        content = headers + "\r\n\r\n" + self.body
-        self.ser.sendmail(self.from_addr, self.to_addr, content)
+    def send_mail(self, filename=""):
+        msg = MIMEMultipart()
+        msg["From"] = self.from_addr
+        msg["To"] = self.to_addr
+        msg["Subject"] = self.subject
+        body = MIMEMultipart('alternative')
+        body.attach(MIMEText(self.content, "plain"))
+        msg.attach(body)
+        msg.attach(MIMEText(file(filename).read()))
+        self.ser.sendmail(self.from_addr, self.to_addr, msg.as_string())
