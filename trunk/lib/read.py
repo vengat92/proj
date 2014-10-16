@@ -9,9 +9,14 @@ class READ:
     def authentication(self, username, password):
         self.imap.login(username, password)
 
-    def read_mail(self, sender):
+    def read_mail(self, receiver=""):
         self.imap.select('INBOX')
-        status, response = self.imap.search(None, '(UNSEEN)', '(FROM "%s")' % (sender))
+        
+        if receiver == "":
+            status, response = self.imap.search(None, '(UNSEEN)', 'ALL')
+        else:
+            status, response = self.imap.search(None, '(UNSEEN)', '(FROM "%s")' % (receiver))
+        
         msg = response[0].split()
 
         """for e_id in msg:
