@@ -1,30 +1,26 @@
 import imaplib
 
-def read(username, password, sender_of_interest):
-    # Login to INBOX
-    imap = imaplib.IMAP4_SSL("imap.gmail.com", 993)
-    imap.login(username, password)
-    imap.select('INBOX')
 
-    # Use search(), not status()
-    status, response = imap.search('INBOX', '(UNSEEN)')
-    unread_msg_nums = response[0].split()
+class READ:
 
-    # Print the count of all unread messages
-    print len(unread_msg_nums)
+    def __init__(self, server, port):
+        self.imap = imaplib.IMAP4_SSL(server, int(port))
 
-    # Print all unread messages from a certain sender of interest
-    status, response = imap.search(None, '(UNSEEN)', '(FROM "%s")' % (sender_of_interest))
-    unread_msg_nums = response[0].split()
-    da = []
-    for e_id in unread_msg_nums:
-        _, response = imap.fetch(e_id, '(UID BODY[TEXT])')
-        da.append(response[0][1])
-    print da
+    def authentication(self, username, password):
+        self.imap.login(username, password)
 
-    # Mark them as seen
-    for e_id in unread_msg_nums:
-        imap.store(e_id, '+FLAGS', '\Seen')
+    def read_mail(self, sender):
+        self.imap.select('INBOX')
+        status, response = self.imap.search(None, '(UNSEEN)', '(FROM "%s")' % (sender))
+        msg = response[0].split()
 
-if __name__ == "__main__":
-    read("clientmail3@gmail.com", "ClientMail123", "clientmail3@gmail.com")
+        """for e_id in msg:
+            imap.store(e_id, '+FLAGS', '\Seen')
+            """
+        data = []
+
+        for e_id in msg:
+            _, response = self.imap.fetch(e_id, '(UID BODY[TEXT])')
+            data.append(response[0][1])
+
+        return data
